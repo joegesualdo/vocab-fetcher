@@ -4,9 +4,12 @@ var cheerio = require("cheerio");
 function url(word){
   return "http://app.vocabulary.com/app/1.0/dictionary/search?word="+word+"&tz=America%2FNew_York&tzo=-300&appver=1.0.0" 
 }
+function sentenceUrl(word){
+  return "http://corpus.vocabulary.com/api/1.0/examples.json?query="+word+"&maxResults=24&startOffset=0&filter=3&tz=America%2FNew_York&tzo=-300&appver=1.0.0"
+}
 
 function getShortDescription(word, callback){
-  request(url(), function (error, response, body) {
+  request(url(word), function (error, response, body) {
     if (!error) {
       var $ = cheerio.load(body)
       var  def = $("p.short").text();
@@ -18,7 +21,7 @@ function getShortDescription(word, callback){
 }
 
 function getLongDescription(word, callback){
-  request(url(), function (error, response, body) {
+  request(url(word), function (error, response, body) {
     if (!error) {
       var $ = cheerio.load(body)
       var  def = $("p.long").text();
@@ -49,20 +52,33 @@ function getDefs(options, callback){
   }.bind(this, options));
 }
 
+function getSentences(options, callback){
+  var options  = options || {};
+  var word = options["word"]
+  options["count"] = options["count"] || 10
+
+  if(typeof word == undefined){
+    throw(new Error("Please provide a word"));
+  }
+  request(sentenceUrl(word), function (options, error, response, body) {
+    if (!error) {
+      var jsonResponse= JSON.parse(body)
+      var sentences = [];
+      for(var i = 0; i < options["count"]; i++){
+        sentences.push(jsonResponse['result']['sentences'][i]['sentence'])
+      }
+      callback(null, sentences);
+    } else {
+      callback(error);
+    }
+  }.bind(this, options));
+}
+
 var vocabFetcher = {
   getShortDescription: getShortDescription,
   getLongDef: getLongDescription,
-  getDefs: getDefs
+  getDefs: getDefs,
+  getSentences: getSentences
 }
 
-// module.exports = vocabFetcher
-vocabFetcher.getDefs({word: "ambiguous"}, function(err, definitions){
-  if(err){
-    throw(err);
-  } else {
-    console.log(typeof sentences);
-    // sentences.each(function(i, sentence){
-    //   console.log(sentence);
-    // })
-  }
-});
+module.exports = vocabFetcher

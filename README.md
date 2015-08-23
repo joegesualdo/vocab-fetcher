@@ -6,25 +6,63 @@
 $ npm install --save vocab-fetcher
 ```
 
-## Usage
+## API
+
+### .getShortDescription(word, callback(error, description))
 ```javascript
 var vocabFetcher = require("vocab-fetcher");
 
-vocabFetcher.getShortDef("ambiguous", function(err, def){
+vocabFetcher.getShortDescription("ambiguous", function(err, description){
   if(!err){
-    console.log(def);
+    console.log(description);
+  } else {
+    throw(err);
+  }
+});
+```
+### .getLongDescription(word, callback(error, description))
+```javascript
+var vocabFetcher = require("vocab-fetcher");
+
+vocabFetcher.getLongDescription("ambiguous", function(err, description){
+  if(!err){
+    console.log(description);
   } else {
     throw(err);
   }
 });
 ```
 
-## API
+### .getDefs(options, callback(error, definitions))
+```javascript
+vocabFetcher.getDefs({
+  word: "ambiguous"
+}, function(err, defintions){
+  if(err){
+    throw(err);
+  } else {
+    for(var i = 0; i < definitions.length; i++){
+      console.log(i + ") " + defintions[i]);
+    }
+  }
+});
+```
 
-### .getShortDef(word, callback(error, definition))
-
-### .getLongDef(word, callback(error, definition))
-
+### .getSentences(options, callback(error, sentences))
+```javascript
+vocabFetcher.getSentences({
+  word: "ambiguous",
+  count: 5
+}, function(err, sentences){
+  if(err){
+    throw(err);
+  } else {
+    for(var i = 0; i < sentences.length; i++){
+      console.log(i + ") " +sentences[i]);
+    }
+  }
+});
+```
 
 
 
