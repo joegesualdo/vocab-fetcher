@@ -64,5 +64,21 @@ vocabFetcher.getSentences({
 });
 ```
 
+### .getImages(options, callback(error, imageUrls))
+
+```javascript
+vocabFetcher.getImages({
+  word: "ambiguous"
+}, function(err, imageUrls){
+  if(err){
+    throw(err);
+  } else {
+    for(var i = 0; i < imageUrls.length; i++){
+      console.log(i + ") " +imageUrls[i]);
+    }
+  }
+});
+```
+
 
 
