@@ -5,7 +5,7 @@ function url(word){
   return "http://app.vocabulary.com/app/1.0/dictionary/search?word="+word+"&tz=America%2FNew_York&tzo=-300&appver=1.0.0" 
 }
 
-function getShortDef(word, callback){
+function getShortDescription(word, callback){
   request(url(), function (error, response, body) {
     if (!error) {
       var $ = cheerio.load(body)
@@ -17,7 +17,7 @@ function getShortDef(word, callback){
   });
 }
 
-function getLongDef(word, callback){
+function getLongDescription(word, callback){
   request(url(), function (error, response, body) {
     if (!error) {
       var $ = cheerio.load(body)
@@ -29,16 +29,40 @@ function getLongDef(word, callback){
   });
 }
 
-var vocabFetcher = {
-  getShortDef: getShortDef,
-  getLongDef: getLongDef
+function getDefs(options, callback){
+  var options  = options || {};
+  var word = options["word"]
+  if(typeof word == undefined){
+    throw(new Error("Please provide a word"));
+  }
+  request(url(word), function (options, error, response, body) {
+    if (!error) {
+      var $ = cheerio.load(body)
+      var  $definitionElements = $(".section.definition .sense");
+      var definitions = $definitionElements.map(function(i, el){
+        return $(el).find("h3.definition").text().replace( /\s\s+/g, ' ' )
+      })
+      callback(null, definitions);
+    } else {
+      callback(error);
+    }
+  }.bind(this, options));
 }
 
-module.exports = vocabFetcher
-// vocabFetcher.getLongDef("hello", function(err, def){
-//   if(err){
-//     throw(err);
-//   } else {
-//     console.log(def)
-//   }
-// });
+var vocabFetcher = {
+  getShortDescription: getShortDescription,
+  getLongDef: getLongDescription,
+  getDefs: getDefs
+}
+
+// module.exports = vocabFetcher
+vocabFetcher.getDefs({word: "ambiguous"}, function(err, definitions){
+  if(err){
+    throw(err);
+  } else {
+    console.log(typeof sentences);
+    // sentences.each(function(i, sentence){
+    //   console.log(sentence);
+    // })
+  }
+});
