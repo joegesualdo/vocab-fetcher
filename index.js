@@ -49,7 +49,7 @@ function addSentencesToWordObject(wordObj, callback){
   try {
     getVocabDotComSentenceDOM(wordObj.name, function(err, body){
       convertVocabDotComSentenceDomToJSON(body, function(err, json){
-        wordObj.sentences = json
+        wordObj.sentences = json["sentences"]
         callback(null, wordObj)
       })
     })
