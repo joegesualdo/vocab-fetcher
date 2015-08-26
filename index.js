@@ -9,11 +9,12 @@ var Word = function(word){
   this.vocabDotComSentenceURL = sentenceUrl(word);
 }
 
+
 var WordFetcher = function(){
   this.getWord = function(word){
     var self = this;
     return new Promise(function (resolve, reject) {
-      self.getVocabDotComDOM(word).then(self.convertVocabDotComDomToJSON).then(self.addSentencesToWordObject).then(function(wordObj){
+      self.getVocabDotComDOM(word).then(self.convertVocabDotComDomToJSON).then(self.addSentencesToWordObject).then(self.addImagesToWordObject).then(function(wordObj){
         resolve(wordObj)
       }).catch(function(e){
         reject(e)
@@ -23,105 +24,10 @@ var WordFetcher = function(){
   this.url = url;
   this.sentenceUrl = sentenceUrl;
   this.imageUrls = imageUrls;
-  this.getVocabDotComDOM = function(word){
-    return new Promise(function (resolve, reject) {
-      getVocabDotComDOM(word, function(err, body){
-        if(!err){
-          resolve(body)
-        } else {
-          reject(err)
-        }
-      })
-    })
-  }
-  this.addSentencesToWordObject = function(wordObj){
-    return new Promise(function (resolve, reject) {
-      addSentencesToWordObject(wordObj, function(err, wordObj){
-        if(!err){
-          resolve(wordObj)
-        } else {
-          reject(err)
-        }
-      })
-    })
-  }
-  this.addImagesToWordObject = function(wordObj){
-    return new Promise(function (resolve, reject) {
-      addImagesToWordObject(wordObj, function(err, wordObj){
-        if(!err){
-          resolve(wordObj)
-        } else {
-          reject(err)
-        }
-      })
-    })
-  }
-  this.getVocabDotComSentenceDOM = function(word){
-    return new Promise(function (resolve, reject) {
-      getVocabDotComSentenceDOM(word, function(err, body){
-        if(!err){
-          resolve(body)
-        } else {
-          reject(err)
-        }
-      })
-    })
-  }
-  this.convertVocabDotComDomToJSON = function(body){
-    return new Promise(function (resolve, reject) {
-      convertVocabDotComDomToJSON(body, function(err, wordJSON){
-        if(!err){
-          resolve(wordJSON)
-        } else {
-          reject(err)
-        }
-      })
-    })
-  }
-  this.convertVocabDotComSentenceDomToJSON = function(body){
-    return new Promise(function (resolve, reject) {
-      convertVocabDotComSentenceDomToJSON(body, function(err, wordJSON){
-        if(!err){
-          resolve(wordJSON)
-        } else {
-          reject(err)
-        }
-      })
-    })
-  }
-  this.getImages = function(word){
-    return new Promise(function (resolve, reject) {
-      getImages(word, function(err, images){
-        if(err){
-          reject(err)
-        } else {
-          resolve(images)
-        }
-      })
-    })
-  }
-  this.getShortDescription = function(word){
-    return new Promise(function (resolve, reject) {
-      getShortDescription(word, function(err, description){
-        if(err){
-          reject(err)
-        } else {
-          resolve(description)
-        }
-      })
-    })
-  }
-  this.getLongtDescriptionPromise = function(word){
-    return new Promise(function(resolve, reject){
-      getLongDescription(word, function(err, description){
-        if(err){
-          reject(err)
-        } else {
-          resolve(description)
-        }
-      })
-    })
-  }
+  this.getVocabDotComDOM = getVocabDotComDomPromise
+  this.convertVocabDotComDomToJSON = convertVocabDotComDomToJSONPromise
+  this.addSentencesToWordObject = addSentencesToWordObjectPromise 
+  this.addImagesToWordObject = addImagesToWordObjectPromise
 }
 
 function url(word){
@@ -315,12 +221,97 @@ function getImages(word, callback){
   })
 }
 
-var wordFetcher = new WordFetcher();
+// Promise Functions ====================
+function getVocabDotComDomPromise(word){
+  return new Promise(function (resolve, reject) {
+    getVocabDotComDOM(word, function(err, body){
+      if(!err){
+        resolve(body)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+function addSentencesToWordObjectPromise(wordObj){
+  return new Promise(function (resolve, reject) {
+    addSentencesToWordObject(wordObj, function(err, wordObj){
+      if(!err){
+        resolve(wordObj)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+function addImagesToWordObjectPromise(wordObj){
+  return new Promise(function (resolve, reject) {
+    addImagesToWordObject(wordObj, function(err, wordObj){
+      if(!err){
+        resolve(wordObj)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+function getVocabDotComSentenceDOMPromise(word){
+  return new Promise(function (resolve, reject) {
+    getVocabDotComSentenceDOM(word, function(err, body){
+      if(!err){
+        resolve(body)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+function convertVocabDotComDomToJSONPromise(body){
+  return new Promise(function (resolve, reject) {
+    convertVocabDotComDomToJSON(body, function(err, wordJSON){
+      if(!err){
+        resolve(wordJSON)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
 
-wordFetcher.getVocabDotComDOM("ambiguous")
-.then(wordFetcher.convertVocabDotComDomToJSON)
-.then(wordFetcher.addSentencesToWordObject)
-.then(wordFetcher.addImagesToWordObject)
-.then(function(wordObj){
-  console.log(wordObj)
-})
+function convertVocabDotComSentenceDomToJSONPromise(body){
+  return new Promise(function (resolve, reject) {
+    convertVocabDotComSentenceDomToJSON(body, function(err, wordJSON){
+      if(!err){
+        resolve(wordJSON)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+
+function getImagesPromise(word){
+  return new Promise(function (resolve, reject) {
+    getImages(word, function(err, images){
+      if(err){
+        reject(err)
+      } else {
+        resolve(images)
+      }
+    })
+  })
+}
+function getShortDescriptionPromise(word){
+  return new Promise(function (resolve, reject) {
+    getShortDescription(word, function(err, description){
+      if(err){
+        reject(err)
+      } else {
+        resolve(description)
+      }
+    })
+  })
+}
+// End Promise Functions ====================
+
+module.exports = WordFetcher;
