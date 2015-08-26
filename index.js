@@ -1,6 +1,35 @@
 var request = require("request");
 var cheerio = require("cheerio");
 var async = require("async");
+var Promise = require('bluebird');
+
+var Word = function(word){
+  this.url = url(word);
+  this.sentenceUrl = sentenceUrl(word);
+  this.imageUrls = sentenceUrl(word);
+  this.getShortDescriptionPromise = function(word){
+    return new Promise(function(resolve, reject){
+      getShortDescription(word, function(err, description){
+        if(err){
+          reject(err)
+        } else {
+          resolve(description)
+        }
+      })
+    })
+  }
+  this.getLongtDescriptionPromise = function(word){
+    return new Promise(function(resolve, reject){
+      getLongDescription(word, function(err, description){
+        if(err){
+          reject(err)
+        } else {
+          resolve(description)
+        }
+      })
+    })
+  }
+}
 
 function url(word){
   return "http://app.vocabulary.com/app/1.0/dictionary/search?word="+word+"&tz=America%2FNew_York&tzo=-300&appver=1.0.0" 
@@ -110,12 +139,17 @@ function getImages(options, callback){
   })
 }
 
-var vocabFetcher = {
-  getShortDescription: getShortDescription,
-  getLongDef: getLongDescription,
-  getDefs: getDefs,
-  getSentences: getSentences,
-  getImages: getImages
-}
-
-module.exports = vocabFetcher
+// var vocabFetcher = {
+//   getShortDescription: getShortDescription,
+//   getLongDef: getLongDescription,
+//   getDefs: getDefs,
+//   getSentences: getSentences,
+//   getImages: getImages
+// }
+//
+// module.exports = vocabFetcher
+//
+var hello = new Word("hello");
+hello.getShortDescriptionPromise().then(function(result){
+  console.log(result)
+})
