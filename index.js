@@ -45,6 +45,10 @@ function imageUrls(word){
   return urls;
 }
 
+function dictionaryDotComUrl(word){
+  return "http://dictionary.reference.com/browse/" + word 
+}
+
 function addSentencesToWordObject(wordObj, callback){
   try {
     getVocabDotComSentenceDOM(wordObj.name, function(err, body){
@@ -172,6 +176,25 @@ function getDefs(options, callback){
       callback(error);
     }
   }.bind(this, options));
+}
+
+function getAudio(word, callback){
+  if(typeof word == undefined){
+    throw(new Error("Please provide a word"));
+  }
+  request(dictionaryDotComUrl(word), function (word, error, response, body) {
+    if (!error) {
+      var $ = cheerio.load(body)
+      var link = $(".audio-wrapper .speaker").attr('href')
+      // var definitions = []
+      // $(".section.definition .sense").each(function(i, el){
+      //   definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
+      // })
+      callback(null, link);
+    } else {
+      callback(error);
+    }
+  }.bind(this, word));
 }
 
 function getSentences(options, callback){
