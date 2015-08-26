@@ -2,13 +2,11 @@ var request = require("request");
 var cheerio = require("cheerio");
 var async = require("async");
 var Promise = require('bluebird');
-var WrapChainablePromise = require('p-romise').WrapChainable;
 
 var Word = function(word){
   this.name = word;
   this.vocabDotComUrl = url(word);
   this.vocabDotComSentenceURL = sentenceUrl(word);
-  this.imageUrls = imageUrls(word)
 }
 
 var WordFetcher = function(){
@@ -47,6 +45,17 @@ var WordFetcher = function(){
       })
     })
   }
+  this.addImagesToWordObject = function(wordObj){
+    return new Promise(function (resolve, reject) {
+      addImagesToWordObject(wordObj, function(err, wordObj){
+        if(!err){
+          resolve(wordObj)
+        } else {
+          reject(err)
+        }
+      })
+    })
+  }
   this.getVocabDotComSentenceDOM = function(word){
     return new Promise(function (resolve, reject) {
       getVocabDotComSentenceDOM(word, function(err, body){
@@ -76,6 +85,17 @@ var WordFetcher = function(){
           resolve(wordJSON)
         } else {
           reject(err)
+        }
+      })
+    })
+  }
+  this.getImages = function(word){
+    return new Promise(function (resolve, reject) {
+      getImages(word, function(err, images){
+        if(err){
+          reject(err)
+        } else {
+          resolve(images)
         }
       })
     })
@@ -126,6 +146,21 @@ function addSentencesToWordObject(wordObj, callback){
         wordObj.sentences = json
         callback(null, wordObj)
       })
+    })
+  } catch(e){
+    callback(e)
+  }
+}
+
+function addImagesToWordObject(wordObj, callback){
+  try {
+    getImages(wordObj.name, function(err, images){
+      if (!err){
+        wordObj.images = images;
+        callback(null, wordObj)
+      } else {
+        callback(e)
+      }
     })
   } catch(e){
     callback(e)
@@ -184,9 +219,6 @@ function convertVocabDotComDomToJSON(body, callback){
     catch(e) {
       callback(e)
     }
-    // } else {
-    //   callback(error);
-    // }
 }
 
 function getShortDescription(word, callback){
@@ -254,25 +286,26 @@ function getSentences(options, callback){
     }
   }.bind(this, options));
 }
-function getImages(options, callback){
-  var options  = options || {};
-  var word = options["word"]
 
+function getImages(word, callback){
   if(typeof word == undefined){
     throw(new Error("Please provide a word"));
   }
+
   var potentialImageUrls = imageUrls(word);
   var successfulImageUrls = [];
+
   async.each(potentialImageUrls, function(url, callback){
     var potentialImageUrl = url;
-    request(potentialImageUrl, function (options, potentialImageUrl, successfulImageUrls, error, response, body) {
+
+    request(potentialImageUrl, function (word, potentialImageUrl, successfulImageUrls, error, response, body) {
       if (!error && response.statusCode == 200) {
         successfulImageUrls.push(potentialImageUrl);
         callback();
       } else {
         callback();
       }
-    }.bind(this, options, potentialImageUrl, successfulImageUrls));
+    }.bind(this, word, potentialImageUrl, successfulImageUrls));
   }, function(err){
     if(!err){
       callback(null, successfulImageUrls)
@@ -282,67 +315,12 @@ function getImages(options, callback){
   })
 }
 
-// var vocabFetcher = {
-//   getShortDescription: getShortDescription,
-//   getLongDef: getLongDescription,
-//   getDefs: getDefs,
-//   getSentences: getSentences,
-//   getImages: getImages
-// }
-//
-// module.exports = vocabFetcher
-//
-// var hello = new Word("hello");
-// hello.getShortDescriptionPromise().then(function(result){
-//   console.log(result)
-// })
-// WrapChainablePromise(function(resolve, reject){
-//   getShortDescription("ambiguous", function(err, description){
-//     if(err){
-//       reject(err);
-//     } else {
-//       resolve(description)
-//     }
-//   })
-// }).then(function(val, resolve, reject){
-//   getLongDescription("ambiguous", function(err, description){
-//     if(err){
-//       reject(err);
-//     } else {
-//       resolve(description)
-//     }
-//   })
-// }, function(err){
-//   console.log("There was an error getting short the description")
-// }).then(function(val, resolve, reject){
-// })
-
 var wordFetcher = new WordFetcher();
-//
-// wordFetcher.getShortDescription("ambiguous").then(function(des){
-//   console.log(des)
-// })
-// wordFetcher.getWord("ambiguous").then(function(wordObj){
-//   console.log(wordObj)
-// })
 
-
-// wordFetcher.getVocabDotComDOM("ambiguous").then(wordFetcher.convertVocabDotComDomToJSON).then(wordFetcher.addSentencesToWordObject).then(function(wordObj){
-//   console.log(wordObj)
-// })
-// .catch(function(e) {
-//   console.log(e.message)
-// });
-// wordFetcher.getVocabDotComSentenceDOM("ambiguous").then(wordFetcher.convertVocabDotComSentenceDomToJSON).then(function(json){
-//   console.log(json);
-// })
-// var wordObj = {name: "ambiguous"}
-// addSentencesToWordObject(wordObj, function(err, wordObj){
-//   console.log(wordObj)
-// })
-//
-wordFetcher.getWord("ambiguous").then(function(word){
-  console.log(word)
+wordFetcher.getVocabDotComDOM("ambiguous")
+.then(wordFetcher.convertVocabDotComDomToJSON)
+.then(wordFetcher.addSentencesToWordObject)
+.then(wordFetcher.addImagesToWordObject)
+.then(function(wordObj){
+  console.log(wordObj)
 })
-// var wordObj = new Word("ambiguous")
-// console.log(wordObj)
