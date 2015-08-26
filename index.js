@@ -117,9 +117,11 @@ function convertVocabDotComDomToJSON(body, callback){
 
       wordObj.shortDescription = $("p.short").text();
       wordObj.longDescription = $("p.long").text();
-      wordObj.definitions = $(".section.definition .sense").map(function(i, el){
-        return $(el).find("h3.definition").text().replace( /\s\s+/g, ' ' )
+      var definitions = []
+      $(".section.definition .sense").each(function(i, el){
+        definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
       })
+      wordObj.definitions = definitions
       callback(null, wordObj);
     } 
     catch(e) {
@@ -161,8 +163,9 @@ function getDefs(options, callback){
     if (!error) {
       var $ = cheerio.load(body)
       var  $definitionElements = $(".section.definition .sense");
-      var definitions = $definitionElements.map(function(i, el){
-        return $(el).find("h3.definition").text().replace( /\s\s+/g, ' ' )
+      var definitions = []
+      $(".section.definition .sense").each(function(i, el){
+        definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
       })
       callback(null, definitions);
     } else {
