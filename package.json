@@ -6,6 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository" : {
+    "type" : "git", 
+    "url" : "https://github.com/joegesualdo/vocab-fetcher"
+  },
   "author": "Joe Gesualdo",
   "license": "MIT",
   "dependencies": {
