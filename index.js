@@ -119,13 +119,24 @@ function convertVocabDotComDomToJSON(body, callback){
       var $ = cheerio.load(body)
       var wordObj = new Word($("h1").text())
 
+      // descriptions
       wordObj.shortDescription = $("p.short").text();
       wordObj.longDescription = $("p.long").text();
+
+      //definitions
       var definitions = []
       $(".section.definition .sense").each(function(i, el){
         definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
       })
       wordObj.definitions = definitions
+
+      // word family
+      var $sections = $(".sectionHeader")
+      var el = $sections[$sections.length - 2]
+      var family = $(el).next().attr('data')
+      var jsonFamily = JSON.parse(family)
+      wordObj.family= jsonFamily
+
       callback(null, wordObj);
     } 
     catch(e) {
@@ -191,6 +202,24 @@ function getAudio(word, callback){
       //   definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
       // })
       callback(null, link);
+    } else {
+      callback(error);
+    }
+  }.bind(this, word));
+}
+
+function getWordFamily(word, callback){
+  if(typeof word == undefined){
+    throw(new Error("Please provide a word"));
+  }
+  request(url(word), function (word, error, response, body) {
+    if (!error) {
+      var $ = cheerio.load(body)
+      var $sections = $(".sectionHeader")
+      var el = $sections[$sections.length - 2]
+      var family = $(el).next().attr('data')
+      var jsonFamily = JSON.parse(family)
+      callback(null, jsonFamily);
     } else {
       callback(error);
     }
