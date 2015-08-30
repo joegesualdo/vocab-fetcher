@@ -98,14 +98,14 @@ function getVocabDotComSentenceDOM(word, callback){
 }
 function convertVocabDotComSentenceDomToJSON(body, callback){
   try {
-    var sentenceCount = 5;
+    // var sentenceCount = 24;
     bodyJSON = JSON.parse(body)
-    var sentences = [];
-    for(var i = 0; i < sentenceCount; i++){
-      sentences.push(bodyJSON['result']['sentences'][i]['sentence'])
-    }
+    // var sentences = [];
+    // for(var i = 0; i < sentenceCount; i++){
+    //   sentences.push(bodyJSON['result']['sentences'][i]['sentence'])
+    // }
     wordJSON = {}
-    wordJSON.sentences = sentences;
+    wordJSON.sentences = bodyJSON['result']['sentences'];
     callback(null, wordJSON);
   } 
   catch(e) {
@@ -226,27 +226,28 @@ function getWordFamily(word, callback){
   }.bind(this, word));
 }
 
-function getSentences(options, callback){
-  var options  = options || {};
-  var word = options["word"]
-  options["count"] = options["count"] || 10
-
-  if(typeof word == undefined){
-    throw(new Error("Please provide a word"));
-  }
-  request(sentenceUrl(word), function (options, error, response, body) {
-    if (!error) {
-      var jsonResponse= JSON.parse(body)
-      var sentences = [];
-      for(var i = 0; i < options["count"]; i++){
-        sentences.push(jsonResponse['result']['sentences'][i]['sentence'])
-      }
-      callback(null, sentences);
-    } else {
-      callback(error);
-    }
-  }.bind(this, options));
-}
+// TODO: Change method to get the entire sentence object
+// function getSentences(options, callback){
+//   var options  = options || {};
+//   var word = options["word"]
+//   options["count"] = options["count"] || 10
+//
+//   if(typeof word == undefined){
+//     throw(new Error("Please provide a word"));
+//   }
+//   request(sentenceUrl(word), function (options, error, response, body) {
+//     if (!error) {
+//       var jsonResponse= JSON.parse(body)
+//       var sentences = [];
+//       for(var i = 0; i < options["count"]; i++){
+//         sentences.push(jsonResponse['result']['sentences'][i]['sentence'])
+//       }
+//       callback(null, sentences);
+//     } else {
+//       callback(error);
+//     }
+//   }.bind(this, options));
+// }
 
 function getImages(word, callback){
   if(typeof word == undefined){
@@ -370,3 +371,5 @@ function getShortDescriptionPromise(word){
 // End Promise Functions ====================
 
 module.exports = WordFetcher;
+
+
