@@ -33,6 +33,9 @@ var WordFetcher = function(){
 function url(word){
   return "http://app.vocabulary.com/app/1.0/dictionary/search?word="+word+"&tz=America%2FNew_York&tzo=-300&appver=1.0.0" 
 }
+function vocabularyDotComAudioUrl(id){
+  return "http://s3.amazonaws.com/audio.vocabulary.com/1.0/us/" + id + ".mp3"
+}
 function sentenceUrl(word){
   return "http://corpus.vocabulary.com/api/1.0/examples.json?query="+word+"&maxResults=24&startOffset=0&filter=3&tz=America%2FNew_York&tzo=-300&appver=1.0.0"
 }
@@ -130,6 +133,11 @@ function convertVocabDotComDomToJSON(body, callback){
       })
       wordObj.definitions = definitions
 
+      // audio file
+      var audioId = $(".dynamictext").children('a').data('audio')
+      var audioUrl = vocabularyDotComAudioUrl(audioId)
+      wordObj.audioUrl = audioUrl
+
       // word family
       var $sections = $(".sectionHeader")
       var el = $sections[$sections.length - 2]
@@ -189,7 +197,7 @@ function getDefs(options, callback){
   }.bind(this, options));
 }
 
-function getAudio(word, callback){
+function getAudioFromDictionaryDotCom(word, callback){
   if(typeof word == undefined){
     throw(new Error("Please provide a word"));
   }
@@ -220,6 +228,22 @@ function getWordFamily(word, callback){
       var family = $(el).next().attr('data')
       var jsonFamily = JSON.parse(family)
       callback(null, jsonFamily);
+    } else {
+      callback(error);
+    }
+  }.bind(this, word));
+}
+
+function getVocabularyDotComAudioUrl(word, callback){
+  if(typeof word == undefined){
+    throw(new Error("Please provide a word"));
+  }
+  request(url(word), function (word, error, response, body) {
+    if (!error) {
+      var $ = cheerio.load(body)
+      var audioId= $(".dynamictext").children('a').data('audio')
+      var audioUrl = vocabularyDotComAudioUrl(audioId)
+      callback(null, audioUrl);
     } else {
       callback(error);
     }
@@ -371,5 +395,3 @@ function getShortDescriptionPromise(word){
 // End Promise Functions ====================
 
 module.exports = WordFetcher;
-
-
