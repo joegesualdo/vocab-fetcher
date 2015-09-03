@@ -146,12 +146,20 @@ function convertVocabDotComDomToJSON(body, callback){
 
       //definitions
       var definitions = []
-      // If page has "Primary Meaning" defintions, we should use
+      // If page has "Primary Meaning" definitions, we should use
       //   these and not the general defintiions
       // Checks for "Primary Meaning" definitions
       if ($(".def.selected").length != 0){
-        $(".def.selected").each(function(i, el){
-          definitions.push($(el).text().replace( /\s\s+/g, ' ' ))
+        $(".definitionNavigator").find("tr").each(function(i, el){
+          var definitionString = ""
+          // Add the word Form to the sentence
+          $(el).find(".posList").each(function(i, el){
+            definitionString = definitionString + $(el).children()[0].children[0].data + " "
+          })
+          $(el).find(".def.selected").each(function(i, el){
+            definitionString = definitionString + $(el).text().replace( /\s\s+/g, ' ' )
+          })
+          definitions.push(definitionString)
         })
       } else {
         $(".section.definition .sense").each(function(i, el){
