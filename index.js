@@ -151,19 +151,20 @@ function convertVocabDotComDomToJSON(body, callback){
       // Checks for "Primary Meaning" definitions
       if ($(".def.selected").length != 0){
         $(".definitionNavigator").find("tr").each(function(i, el){
-          var definitionString = ""
+          var defObj = {}
           // Add the word Form to the sentence
-          $(el).find(".posList").each(function(i, el){
-            definitionString = definitionString + $(el).children()[0].children[0].data + " "
-          })
-          $(el).find(".def.selected").each(function(i, el){
-            definitionString = definitionString + $(el).text().replace( /\s\s+/g, ' ' )
-          })
-          definitions.push(definitionString)
+          defObj.partOfSpeech = $(el).find(".posList").children()[0].children[0].data
+          defObj.defintion = $(el).find(".def.selected").text().replace( /\s\s+/g, ' ' )
+          definitions.push(defObj)
         })
       } else {
         $(".section.definition .sense").each(function(i, el){
-          definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
+          var defObj = {}
+          // Add the word Form to the sentence
+          originalString = $(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ).trim()
+          defObj.partOfSpeech =  originalString.split(" ")[0]
+          defObj.defintion = originalString.split(' ').slice(1).join(' '); 
+          definitions.push(defObj)
         })
       }
       wordObj.definitions = definitions
