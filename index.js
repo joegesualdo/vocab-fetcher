@@ -14,7 +14,7 @@ var WordFetcher = function(){
   this.getWord = function(word){
     var self = this;
     return new Promise(function (resolve, reject) {
-      self.getVocabDotComDOM(word).then(self.convertVocabDotComDomToJSON).then(self.addSentencesToWordObject).then(self.addImagesToWordObject).then(function(wordObj){
+      self.getVocabDotComDOM(word).then(self.convertVocabDotComDomToJSON).then(self.addSentencesToWordObject).then(self.addImagesToWordObject).then(self.addMnemonicToWordObject).then(function(wordObj){
         resolve(wordObj)
       }).catch(function(e){
         reject(e)
@@ -27,6 +27,7 @@ var WordFetcher = function(){
   this.getVocabDotComDOM = getVocabDotComDomPromise
   this.convertVocabDotComDomToJSON = convertVocabDotComDomToJSONPromise
   this.addSentencesToWordObject = addSentencesToWordObjectPromise 
+  this.addMnemonicToWordObject = addMnemonicToWordObjectPromise
   this.addImagesToWordObject = addImagesToWordObjectPromise
 }
 
@@ -35,6 +36,9 @@ function url(word){
 }
 function vocabularyDotComAudioUrl(id){
   return "http://s3.amazonaws.com/audio.vocabulary.com/1.0/us/" + id + ".mp3"
+}
+function mnemonicDictionaryUrl(word){
+  return "http://www.mnemonicdictionary.com/?word=" + word 
 }
 function sentenceUrl(word){
   return "http://corpus.vocabulary.com/api/1.0/examples.json?query="+word+"&maxResults=24&startOffset=0&filter=3&tz=America%2FNew_York&tzo=-300&appver=1.0.0"
@@ -70,6 +74,20 @@ function addImagesToWordObject(wordObj, callback){
     getImages(wordObj.name, function(err, images){
       if (!err){
         wordObj.images = images;
+        callback(null, wordObj)
+      } else {
+        callback(e)
+      }
+    })
+  } catch(e){
+    callback(e)
+  }
+}
+function addMnemonicToWordObject(wordObj, callback){
+  try {
+    getMnemonic(wordObj.name, function(err, mnemonic){
+      if (!err){
+        wordObj.mnemonic= mnemonic;
         callback(null, wordObj)
       } else {
         callback(e)
@@ -128,9 +146,18 @@ function convertVocabDotComDomToJSON(body, callback){
 
       //definitions
       var definitions = []
-      $(".section.definition .sense").each(function(i, el){
-        definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
-      })
+      // If page has "Primary Meaning" defintions, we should use
+      //   these and not the general defintiions
+      // Checks for "Primary Meaning" definitions
+      if ($(".def.selected").length != 0){
+        $(".def.selected").each(function(i, el){
+          definitions.push($(el).text().replace( /\s\s+/g, ' ' ))
+        })
+      } else {
+        $(".section.definition .sense").each(function(i, el){
+          definitions.push($(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ))
+        })
+      }
       wordObj.definitions = definitions
 
       // audio file
@@ -300,6 +327,17 @@ function getImages(word, callback){
     }
   })
 }
+function getMnemonic(word, callback){
+  request(mnemonicDictionaryUrl(word), function (error, response, body) {
+    if (!error) {
+      var $ = cheerio.load(body)
+      var  mnemonic = $(".icon-lightbulb").first().parent().text().trim();
+      callback(null, mnemonic);
+    } else {
+      callback(error);
+    }
+  });
+}
 
 // Promise Functions ====================
 function getVocabDotComDomPromise(word){
@@ -316,6 +354,17 @@ function getVocabDotComDomPromise(word){
 function addSentencesToWordObjectPromise(wordObj){
   return new Promise(function (resolve, reject) {
     addSentencesToWordObject(wordObj, function(err, wordObj){
+      if(!err){
+        resolve(wordObj)
+      } else {
+        reject(err)
+      }
+    })
+  })
+}
+function addMnemonicToWordObjectPromise(wordObj){
+  return new Promise(function (resolve, reject) {
+    addMnemonicToWordObject(wordObj, function(err, wordObj){
       if(!err){
         resolve(wordObj)
       } else {
@@ -373,6 +422,17 @@ function convertVocabDotComSentenceDomToJSONPromise(body){
 function getImagesPromise(word){
   return new Promise(function (resolve, reject) {
     getImages(word, function(err, images){
+      if(err){
+        reject(err)
+      } else {
+        resolve(images)
+      }
+    })
+  })
+}
+function getMnemonicPromise(word){
+  return new Promise(function (resolve, reject) {
+    getMnemonic(word, function(err, mnemonic){
       if(err){
         reject(err)
       } else {
