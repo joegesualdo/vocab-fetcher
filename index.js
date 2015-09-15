@@ -154,12 +154,15 @@ function convertVocabDotComDomToJSON(body, callback){
       //   these and not the general defintiions
       // Checks for "Primary Meaning" definitions
       if ($(".def.selected").length != 0){
-        $(".definitionNavigator").find("tr").each(function(i, el){
-          var defObj = {}
+        $(".definitions").find(".definitionNavigator").find("tr").each(function(i, el){
           // Add the word Form to the sentence
-          defObj.partOfSpeech = $(el).find(".posList").children()[0].children[0].data
-          defObj.defintion = $(el).find(".def.selected").text().replace( /\s\s+/g, ' ' )
-          definitions.push(defObj)
+          var defLength = $(el).find(".posList").children().length
+          for(var y = 0; y < defLength; y++){
+            var defObj = {}
+            defObj.partOfSpeech = $(el).find(".posList").children()[y].children[0].data
+            defObj.definition = $(el).find(".def")[y].children[0].data
+            definitions.push(defObj)
+          }
         })
       } else {
         $(".section.definition .sense").each(function(i, el){
@@ -468,3 +471,5 @@ function getShortDescriptionPromise(word){
 // End Promise Functions ====================
 
 module.exports = WordFetcher;
+
+
