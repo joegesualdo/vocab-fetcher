@@ -170,7 +170,7 @@ function convertVocabDotComDomToJSON(body, callback){
           // Add the word Form to the sentence
           originalString = $(el).find("h3.definition").text().replace( /\s\s+/g, ' ' ).trim()
           defObj.partOfSpeech =  originalString.split(" ")[0]
-          defObj.defintion = originalString.split(' ').slice(1).join(' '); 
+          defObj.definition = originalString.split(' ').slice(1).join(' '); 
           definitions.push(defObj)
         })
       }
