@@ -1,6 +1,6 @@
 {
   "name": "vocab-fetcher",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Fetch Vocabulary",
   "main": "index.js",
   "scripts": {
