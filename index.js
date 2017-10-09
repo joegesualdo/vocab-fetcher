@@ -3,6 +3,8 @@ var cheerio = require("cheerio");
 var async = require("async");
 var Promise = require('bluebird');
 
+const noresults = "wordPage noresults"
+
 var Word = function(word){
   this.name = word;
   this.vocabDotComUrl = url(word);
@@ -103,6 +105,10 @@ function addMnemonicToWordObject(wordObj, callback){
 }
 function getVocabDotComDOM(word, callback){
   request(url(word), function (error, response, body) {
+    // If body contains "wordPage noresults", it's an error.
+    if (body.includes(noresults)) {
+      error = new Error("word not found")
+    }
     if (!error) {
       // var $ = cheerio.load(body)
       // var  def = $("p.short").text();
